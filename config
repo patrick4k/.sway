@@ -15,8 +15,6 @@ set $up k
 set $right l
 # Your preferred terminal emulator
 set $term ghostty
-# Your preferred application launcher
-set $menu fuzzel
 
 ### Output configuration
 #
@@ -83,8 +81,12 @@ output DP-4 {
     # Kill focused window
     bindsym $mod+Shift+q kill
 
-    # Start your launcher
-    bindsym $mod+d exec $menu
+    # Launcher:
+    # Starts background ghostty and reuses the instance
+        exec ghostty --class=com.launcher --gtk-single-instance=true --initial-window=false --quit-after-last-window-closed=true
+        for_window [app_id="^com\.launcher$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10
+        set $menu exec ghostty --class=com.launcher --gtk-single-instance=true --confirm-close-surface=false -e /usr/bin/sway-launcher-desktop
+        bindsym $mod+d exec $menu
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -125,6 +127,12 @@ output DP-4 {
 #
 # Workspaces:
 #
+    # Pin to output
+    workspace 1 output HDMI-A-3
+    workspace 3 output HDMI-A-3
+    workspace 2 output DP-4
+    workspace 4 output DP-4
+
     # Switch to workspace
     bindsym $mod+1 workspace number 1
     bindsym $mod+2 workspace number 2
@@ -182,10 +190,12 @@ output DP-4 {
 
     # Move the currently focused window to the scratchpad
     bindsym $mod+Shift+minus move scratchpad
+    bindsym $mod+Shift+grave move scratchpad
 
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
     bindsym $mod+minus scratchpad show
+    bindsym $mod+grave scratchpad show
 #
 # Resizing containers:
 #
@@ -194,16 +204,16 @@ mode "resize" {
     # right will grow the containers width
     # up will shrink the containers height
     # down will grow the containers height
-    bindsym $left resize shrink width 10px
-    bindsym $down resize grow height 10px
-    bindsym $up resize shrink height 10px
-    bindsym $right resize grow width 10px
+    bindsym $left resize shrink width 50px
+    bindsym $down resize grow height 50px
+    bindsym $up resize shrink height 50px
+    bindsym $right resize grow width 50px
 
     # Ditto, with arrow keys
-    bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
-    bindsym Right resize grow width 10px
+    bindsym Left resize shrink width 50px
+    bindsym Down resize grow height 50px
+    bindsym Up resize shrink height 50px
+    bindsym Right resize grow width 50px
 
     # Return to default mode
     bindsym Return mode "default"
