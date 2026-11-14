@@ -236,20 +236,22 @@ mode "resize" {
     # right will grow the containers width
     # up will shrink the containers height
     # down will grow the containers height
-    bindsym $left resize shrink width 50px
-    bindsym $down resize grow height 50px
-    bindsym $up resize shrink height 50px
-    bindsym $right resize grow width 50px
+    bindsym $left resize shrink width 32px
+    bindsym $down resize grow height 32px
+    bindsym $up resize shrink height 32px
+    bindsym $right resize grow width 32px
 
     # Ditto, with arrow keys
-    bindsym Left resize shrink width 50px
-    bindsym Down resize grow height 50px
-    bindsym Up resize shrink height 50px
-    bindsym Right resize grow width 50px
+    bindsym Shift+$left resize shrink width 128px
+    bindsym Shift+$down resize grow height 128px
+    bindsym Shift+$up resize shrink height 128px
+    bindsym Shift+$right resize grow width 128px
 
     # Return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
+    bindsym --no-repeat --release Super_L mode "default"
 }
 bindsym $mod+r mode "resize"
 
@@ -287,7 +289,6 @@ mode "move" {
     bindsym --no-repeat --release Super_L mode "default"
 }
 bindsym $mod+M mode "move"
-# bindsym --no-repeat --release Super_L mode "super"
 
 #
 # Utilities:
