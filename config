@@ -20,6 +20,13 @@ set $term ghostty
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+exec_always {
+    # it doesn't seem these work...
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+    dbus-update-activation-environment --systemd QT_QPA_PLATFORMTHEME=qt6ct
+}
+
 #
 # Example configuration:
 #
@@ -85,9 +92,14 @@ output DP-4 {
 
     # Launcher:
     # Starts background ghostty and reuses the instance
-        exec ghostty --class=com.launcher --gtk-single-instance=true --initial-window=false --quit-after-last-window-closed=true
-        for_window [app_id="^com\.launcher$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10
-        set $menu exec ghostty --class=com.launcher --gtk-single-instance=true --confirm-close-surface=false -e /usr/bin/sway-launcher-desktop
+        # sway-launcher-desktop with ghostty
+        # exec ghostty --class=com.launcher --gtk-single-instance=true --initial-window=false --quit-after-last-window-closed=true
+        # for_window [app_id="^com\.launcher$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10
+        # set $menu exec ghostty --class=com.launcher --gtk-single-instance=true --confirm-close-surface=false -e /usr/bin/sway-launcher-desktop
+
+        # fuzzel
+        set $menu fuzzel || pkill fuzzel
+
         bindsym $mod+Return exec $menu
 
     # Drag floating windows by holding down $mod and left mouse button.
