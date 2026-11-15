@@ -331,7 +331,7 @@ bindsym --no-repeat --release Super_L mode "super", exec pkill fuzzel
 #
 # Read `man 5 sway-bar` for more information about this section.
 bar {
-    position bottom
+    position top
     status_command while date +'%d.%m.%y %H:%M:%S'; do sleep 1; done
     font JetBrainsMono 11
     colors {
