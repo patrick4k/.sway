@@ -1,116 +1,47 @@
-# Default config for sway
-#
-# Copy this to ~/.config/sway/config and edit it to your liking.
-#
-# Read `man 5 sway` for a complete reference.
-
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
+
 # Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
 set $right l
-# Your preferred terminal emulator
 set $term ghostty
 
-### Output configuration
-#
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-exec_always {
-    # it doesn't seem these work...
-    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-    dbus-update-activation-environment --systemd QT_QPA_PLATFORMTHEME=qt6ct
-}
+exec_always pkill kanshi; exec kanshi
 
-#
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
-
-output HDMI-A-3 {
-    mode 3840x2160@60Hz
-    transform 90
-    position 0 0
-    scale 1.5
-}
-
-output DP-4 {
-    mode 2560x1440@180Hz
-    position 2160 1200
-    adaptive_sync on
-}
+# Switch mode and recolor the focused window (purple while in "super" mode)
+set $switch_mode_default client.focused #4c7899 #285577 #ffffff #2e9fff #285577, mode "default"
+set $switch_mode_super client.focused #6a3d9a #4b2a6e #ffffff #a77bd6 #6a3d9a, mode "super"
 
 # special cases
 for_window [class="Godot"] floating enable
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
-### Idle configuration
-#
-# Example configuration:
-#
-# exec swayidle -w \
-#          timeout 300 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -f -c 000000'
-#
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
-
 ### Input configuration
-#
-# Example configuration:
-#
-  input type:touchpad {
-      dwt enabled
-      tap enabled
-      natural_scroll enabled
-      middle_emulation enabled
-      accel_profile "flat"
-      pointer_accel 0.5
-  }
-#
-#   input type:keyboard {
-#       xkb_layout "eu"
-#   }
-#
-# You can also configure each device individually.
-# Read `man 5 sway-input` for more information about this section.
+input type:touchpad {
+    dwt enabled
+    tap enabled
+    natural_scroll enabled
+    middle_emulation enabled
+    accel_profile "flat"
+    pointer_accel 0.5
+}
 
 ### Key bindings
-#
-# Basics:
-#
     # Start a terminal
     bindsym $mod+T exec $term
+    bindsym $mod+Return exec $term
 
     # Kill focused window
     bindsym $mod+q kill
 
     # Launcher:
-    # Starts background ghostty and reuses the instance
-        # sway-launcher-desktop with ghostty
-        # exec ghostty --class=com.launcher --gtk-single-instance=true --initial-window=false --quit-after-last-window-closed=true
-        # for_window [app_id="^com\.launcher$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10
-        # set $menu exec ghostty --class=com.launcher --gtk-single-instance=true --confirm-close-surface=false -e /usr/bin/sway-launcher-desktop
-
-        # fuzzel
-        set $menu fuzzel || pkill fuzzel
-
-        bindsym $mod+Return exec $menu
+    set $launcher fuzzel || pkill fuzzel
 
     # Drag floating windows by holding down $mod and left mouse button.
-    # Resize them with right mouse button + $mod.
-    # Despite the name, also works for non-floating windows.
-    # Change normal to inverse to use left mouse button for resizing and right
-    # mouse button for dragging.
     floating_modifier $mod normal
 
     # Reload the configuration file
@@ -126,68 +57,80 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
     bindsym $mod+$down focus down
     bindsym $mod+$up focus up
     bindsym $mod+$right focus right
-    # Or use $mod+[up|down|left|right]
-    bindsym $mod+Left focus left
-    bindsym $mod+Down focus down
-    bindsym $mod+Up focus up
-    bindsym $mod+Right focus right
 
     # Move the focused window with the same, but add Shift
     bindsym $mod+Shift+$left move left
     bindsym $mod+Shift+$down move down
     bindsym $mod+Shift+$up move up
     bindsym $mod+Shift+$right move right
-    # Ditto, with arrow keys
-    bindsym $mod+Shift+Left move left
-    bindsym $mod+Shift+Down move down
-    bindsym $mod+Shift+Up move up
-    bindsym $mod+Shift+Right move right
 
     bindsym $mod+N focus next
     bindsym $mod+Shift+N focus prev
+
 #
 # Workspaces:
 #
     # Pin to output
-    workspace 11 output DP-4
-    workspace 12 output DP-4
-    workspace 13 output DP-4
-    workspace 14 output DP-4
-    workspace 15 output DP-4
-    workspace 16 output DP-4
-    workspace 17 output DP-4
-    workspace 18 output DP-4
-    workspace 19 output DP-4
+    set $ws11 "11:1.1"
+    set $ws12 "12:1.2"
+    set $ws13 "13:1.3"
+    set $ws14 "14:1.4"
+    set $ws15 "15:1.5"
+    set $ws16 "16:1.6"
+    set $ws17 "17:1.7"
+    set $ws18 "18:1.8"
+    set $ws19 "19:1.9"
 
-    workspace 21 output HDMI-A-3
-    workspace 22 output HDMI-A-3
-    workspace 23 output HDMI-A-3
-    workspace 24 output HDMI-A-3
-    workspace 25 output HDMI-A-3
-    workspace 26 output HDMI-A-3
-    workspace 27 output HDMI-A-3
-    workspace 28 output HDMI-A-3
-    workspace 29 output HDMI-A-3
+    set $ws21 "21:2.1"
+    set $ws22 "22:2.2"
+    set $ws23 "23:2.3"
+    set $ws24 "24:2.4"
+    set $ws25 "25:2.5"
+    set $ws26 "26:2.6"
+    set $ws27 "27:2.7"
+    set $ws28 "28:2.8"
+    set $ws29 "29:2.9"
+
+    workspace $ws11 output DP-4
+    workspace $ws12 output DP-4
+    workspace $ws13 output DP-4
+    workspace $ws14 output DP-4
+    workspace $ws15 output DP-4
+    workspace $ws16 output DP-4
+    workspace $ws17 output DP-4
+    workspace $ws18 output DP-4
+    workspace $ws19 output DP-4
+
+    workspace $ws21 output HDMI-A-3
+    workspace $ws22 output HDMI-A-3
+    workspace $ws23 output HDMI-A-3
+    workspace $ws24 output HDMI-A-3
+    workspace $ws25 output HDMI-A-3
+    workspace $ws26 output HDMI-A-3
+    workspace $ws27 output HDMI-A-3
+    workspace $ws28 output HDMI-A-3
+    workspace $ws29 output HDMI-A-3
 
     # switch to workspace
-    bindsym $mod+1 workspace 11
-    bindsym $mod+2 workspace 12
-    bindsym $mod+3 workspace 13
-    bindsym $mod+4 workspace 14
-    bindsym $mod+5 workspace 15
-    bindsym $mod+6 workspace 16
-    bindsym $mod+7 workspace 17
-    bindsym $mod+8 workspace 18
-    bindsym $mod+9 workspace 19
-    bindsym $mod+Shift+1 workspace 21
-    bindsym $mod+Shift+2 workspace 22
-    bindsym $mod+Shift+3 workspace 23
-    bindsym $mod+Shift+4 workspace 24
-    bindsym $mod+Shift+5 workspace 25
-    bindsym $mod+Shift+6 workspace 26
-    bindsym $mod+Shift+7 workspace 27
-    bindsym $mod+Shift+8 workspace 28
-    bindsym $mod+Shift+9 workspace 29
+    set $ws-cycle exec ~/.config/sway/scripts/ws-cycle.pl
+    bindsym $mod+1 $ws-cycle $ws11
+    bindsym $mod+2 $ws-cycle $ws12
+    bindsym $mod+3 $ws-cycle $ws13
+    bindsym $mod+4 $ws-cycle $ws14
+    bindsym $mod+5 $ws-cycle $ws15
+    bindsym $mod+6 $ws-cycle $ws16
+    bindsym $mod+7 $ws-cycle $ws17
+    bindsym $mod+8 $ws-cycle $ws18
+    bindsym $mod+9 $ws-cycle $ws19
+    bindsym $mod+Shift+1 $ws-cycle $ws21
+    bindsym $mod+Shift+2 $ws-cycle $ws22
+    bindsym $mod+Shift+3 $ws-cycle $ws23
+    bindsym $mod+Shift+4 $ws-cycle $ws24
+    bindsym $mod+Shift+5 $ws-cycle $ws25
+    bindsym $mod+Shift+6 $ws-cycle $ws26
+    bindsym $mod+Shift+7 $ws-cycle $ws27
+    bindsym $mod+Shift+8 $ws-cycle $ws28
+    bindsym $mod+Shift+9 $ws-cycle $ws29
 
     bindsym $mod+Tab workspace next
     bindsym $mod+Shift+Tab workspace prev
@@ -217,95 +160,60 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
 
     # Move focus to the parent container
     bindsym $mod+a focus parent
+
 #
 # Scratchpad:
 #
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
-
     # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
     bindsym $mod+Shift+grave move scratchpad
 
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
     bindsym $mod+grave scratchpad show
-#
-# Resizing containers:
-#
-mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
+
+### Super mode
+# enter
+bindsym --no-repeat --release Super_L $switch_mode_super, exec pkill fuzzel
+mode "super" {
+    # exit
+    bindsym --no-repeat --release Super_L $switch_mode_default, exec $launcher
+    bindsym Return $switch_mode_default
+    bindsym Escape $switch_mode_default
+
+    # move
+    bindsym $mod+1 move container to workspace 11, $switch_mode_default
+    bindsym $mod+2 move container to workspace 12, $switch_mode_default
+    bindsym $mod+3 move container to workspace 13, $switch_mode_default
+    bindsym $mod+4 move container to workspace 14, $switch_mode_default
+    bindsym $mod+5 move container to workspace 15, $switch_mode_default
+    bindsym $mod+6 move container to workspace 16, $switch_mode_default
+    bindsym $mod+7 move container to workspace 17, $switch_mode_default
+    bindsym $mod+8 move container to workspace 18, $switch_mode_default
+    bindsym $mod+9 move container to workspace 19, $switch_mode_default
+
+    bindsym $mod+Shift+1 move container to workspace 21, $switch_mode_default
+    bindsym $mod+Shift+2 move container to workspace 22, $switch_mode_default
+    bindsym $mod+Shift+3 move container to workspace 23, $switch_mode_default
+    bindsym $mod+Shift+4 move container to workspace 24, $switch_mode_default
+    bindsym $mod+Shift+5 move container to workspace 25, $switch_mode_default
+    bindsym $mod+Shift+6 move container to workspace 26, $switch_mode_default
+    bindsym $mod+Shift+7 move container to workspace 27, $switch_mode_default
+    bindsym $mod+Shift+8 move container to workspace 28, $switch_mode_default
+    bindsym $mod+Shift+9 move container to workspace 29, $switch_mode_default
+
+    # resize
     bindsym $left resize shrink width 32px
     bindsym $down resize grow height 32px
     bindsym $up resize shrink height 32px
     bindsym $right resize grow width 32px
 
-    # Ditto, with arrow keys
     bindsym Shift+$left resize shrink width 128px
     bindsym Shift+$down resize grow height 128px
     bindsym Shift+$up resize shrink height 128px
     bindsym Shift+$right resize grow width 128px
-
-    # Return to default mode
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
-    bindsym --no-repeat --release Super_L mode "default"
 }
-bindsym $mod+r mode "resize"
 
-mode "move" {
-    bindsym $left focus left
-    bindsym $right focus right
-    bindsym $up focus up
-    bindsym $down focus down
-
-    # Move focused container to workspace
-    bindsym $mod+1 move container to workspace 11, mode "default"
-    bindsym $mod+2 move container to workspace 12, mode "default"
-    bindsym $mod+3 move container to workspace 13, mode "default"
-    bindsym $mod+4 move container to workspace 14, mode "default"
-    bindsym $mod+5 move container to workspace 15, mode "default"
-    bindsym $mod+6 move container to workspace 16, mode "default"
-    bindsym $mod+7 move container to workspace 17, mode "default"
-    bindsym $mod+8 move container to workspace 18, mode "default"
-    bindsym $mod+9 move container to workspace 19, mode "default"
-
-    bindsym $mod+Shift+1 move container to workspace 21, mode "default"
-    bindsym $mod+Shift+2 move container to workspace 22, mode "default"
-    bindsym $mod+Shift+3 move container to workspace 23, mode "default"
-    bindsym $mod+Shift+4 move container to workspace 24, mode "default"
-    bindsym $mod+Shift+5 move container to workspace 25, mode "default"
-    bindsym $mod+Shift+6 move container to workspace 26, mode "default"
-    bindsym $mod+Shift+7 move container to workspace 27, mode "default"
-    bindsym $mod+Shift+8 move container to workspace 28, mode "default"
-    bindsym $mod+Shift+9 move container to workspace 29, mode "default"
-
-    # Exit
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+M mode "default"
-    bindsym --no-repeat --release Super_L mode "default"
-}
-bindsym $mod+M mode "move"
-
-mode "super" {
-    bindsym Super_L mode "default", exec $menu
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-
-    bindsym M mode "move"
-    bindsym R mode "resize"
-}
-bindsym --no-repeat --release Super_L mode "super", exec pkill fuzzel
-
-#
-# Utilities:
-#
+### Utilities:
     # Special keys to adjust volume via PulseAudio
     bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
     bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
@@ -326,9 +234,7 @@ bindsym --no-repeat --release Super_L mode "super", exec pkill fuzzel
     # Special key to take a screenshot with grim
     bindsym Print exec grim
 
-#
-# Status Bar:
-#
+### Status Bar:
 # Read `man 5 sway-bar` for more information about this section.
 bar {
     position top
@@ -339,6 +245,8 @@ bar {
         background #ffffff10
         inactive_workspace #32323200 #32323200 #5c5c5c
     }
+    workspace_min_width 64
+    strip_workspace_numbers yes
 }
 
 
