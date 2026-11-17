@@ -2,6 +2,7 @@
 #
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
+set $alt Mod1
 
 # Home row direction keys, like vim
 set $left h
@@ -29,6 +30,8 @@ input type:touchpad {
     accel_profile "flat"
     pointer_accel 0.5
 }
+
+mouse_warping container
 
 ### Key bindings
     # Start a terminal
@@ -71,7 +74,6 @@ input type:touchpad {
 #
 # Workspaces:
 #
-    # Pin to output
     set $ws11 "11:1.1"
     set $ws12 "12:1.2"
     set $ws13 "13:1.3"
@@ -92,25 +94,30 @@ input type:touchpad {
     set $ws28 "28:2.8"
     set $ws29 "29:2.9"
 
-    workspace $ws11 output DP-4
-    workspace $ws12 output DP-4
-    workspace $ws13 output DP-4
-    workspace $ws14 output DP-4
-    workspace $ws15 output DP-4
-    workspace $ws16 output DP-4
-    workspace $ws17 output DP-4
-    workspace $ws18 output DP-4
-    workspace $ws19 output DP-4
+    set $home_right "GIGA-BYTE TECHNOLOGY CO., LTD. GS27QA 24242B001022"
+    set $home_left  "BNQ BenQ EW3270U 95P00593019"
+    set $work_right "ASUSTek COMPUTER INC ASUS VA24E NCLMTF043025"
+    set $work_left  "ASUSTek COMPUTER INC ASUS VA24E NCLMTF043000"
 
-    workspace $ws21 output HDMI-A-3
-    workspace $ws22 output HDMI-A-3
-    workspace $ws23 output HDMI-A-3
-    workspace $ws24 output HDMI-A-3
-    workspace $ws25 output HDMI-A-3
-    workspace $ws26 output HDMI-A-3
-    workspace $ws27 output HDMI-A-3
-    workspace $ws28 output HDMI-A-3
-    workspace $ws29 output HDMI-A-3
+    workspace $ws11 output $home_right $work_right
+    workspace $ws12 output $home_right $work_right
+    workspace $ws13 output $home_right $work_right
+    workspace $ws14 output $home_right $work_right
+    workspace $ws15 output $home_right $work_right
+    workspace $ws16 output $home_right $work_right
+    workspace $ws17 output $home_right $work_right
+    workspace $ws18 output $home_right $work_right
+    workspace $ws19 output $home_right $work_right
+
+    workspace $ws21 output $home_left $work_left
+    workspace $ws22 output $home_left $work_left
+    workspace $ws23 output $home_left $work_left
+    workspace $ws24 output $home_left $work_left
+    workspace $ws25 output $home_left $work_left
+    workspace $ws26 output $home_left $work_left
+    workspace $ws27 output $home_left $work_left
+    workspace $ws28 output $home_left $work_left
+    workspace $ws29 output $home_left $work_left
 
     # switch to workspace
     set $ws-cycle exec ~/.config/sway/scripts/ws-cycle.pl
@@ -182,6 +189,16 @@ mode "super" {
     bindsym Escape $switch_mode_default
 
     # move
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    bindsym $mod+Shift+$left move left
+    bindsym $mod+Shift+$down move down
+    bindsym $mod+Shift+$up move up
+    bindsym $mod+Shift+$right move right
+
+    # move workspace
     bindsym $mod+1 move container to workspace $ws11
     bindsym $mod+2 move container to workspace $ws12
     bindsym $mod+3 move container to workspace $ws13
@@ -203,15 +220,15 @@ mode "super" {
     bindsym $mod+Shift+9 move container to workspace $ws29
 
     # resize
-    bindsym $left resize shrink width 32px
-    bindsym $down resize grow height 32px
-    bindsym $up resize shrink height 32px
-    bindsym $right resize grow width 32px
+    bindsym $down resize shrink width 32px
+    bindsym $alt+$down resize shrink height 32px
+    bindsym $up resize grow width 32px
+    bindsym $alt+$up resize grow height 32px
 
-    bindsym Shift+$left resize shrink width 128px
-    bindsym Shift+$down resize grow height 128px
-    bindsym Shift+$up resize shrink height 128px
-    bindsym Shift+$right resize grow width 128px
+    bindsym Shift+$down resize shrink width 128px
+    bindsym $alt+Shift+$down resize shrink height 128px
+    bindsym Shift+$up resize grow width 128px
+    bindsym $alt+Shift+$up resize grow height 128px
 }
 
 ### Utilities:
