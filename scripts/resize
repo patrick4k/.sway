@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Usage: resize <grow|shrink> <width|height|...> <amount>
+#
+# Run a normal resize. If it fails and the focused window is tiled inside
+# a floating container (e.g. a floating tabbed group), resize that container.
+
+ok=$(swaymsg -r "resize $*" | jq '.[0].success')
+[[ "$ok" == true ]] && exit 0
+
+# Walk from the root to the focused window and print the id of the
+# nearest floating ancestor (prints nothing if there isn't one).
+target=$(swaymsg -t get_tree | jq '
+    def walk_to_focus($float_id):
+        if .focused then $float_id
+        else
+            (.nodes[]?          | walk_to_focus($float_id)),
+            (.floating_nodes[]? | walk_to_focus(.id))
+        end;
+    first(walk_to_focus(null)) // empty')
+
+[[ -n "$target" ]] && exec swaymsg "[con_id=$target] resize $*"
+exit 1

@@ -19,7 +19,7 @@ set $switch_mode_super client.focused #6a3d9a #4b2a6e #ffffff #a77bd6 #6a3d9a, m
 
 # special cases
 for_window [class="Godot"] floating enable
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec dbus-update-activation-environment --systemd DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
 ### Input configuration
 input type:touchpad {
@@ -70,6 +70,7 @@ mouse_warping container
 
     bindsym $mod+N focus next
     bindsym $mod+Shift+N focus prev
+    bindsym $mod+P focus prev
 
 #
 # Workspaces:
@@ -156,6 +157,7 @@ mouse_warping container
     bindsym $mod+s layout stacking
     bindsym $mod+w layout tabbed
     bindsym $mod+e layout toggle split
+    bindsym $mod+d layout default
 
     # Make the current focus fullscreen
     bindsym $mod+F fullscreen
@@ -172,12 +174,8 @@ mouse_warping container
 #
 # Scratchpad:
 #
-    # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+grave move scratchpad
-
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+grave scratchpad show
+    bindsym $mod+Shift+grave exec ~/.config/sway/scripts/scratch-workspace
+    bindsym $mod+grave [con_mark="^_scratch_workspace$"] scratchpad show
 
 ### Super mode
 # enter
@@ -220,15 +218,16 @@ mode "super" {
     bindsym $mod+Shift+9 move container to workspace $ws29, $switch_mode_default
 
     # resize
-    bindsym $down resize shrink width 32px
-    bindsym $alt+$down resize shrink height 32px
-    bindsym $up resize grow width 32px
-    bindsym $alt+$up resize grow height 32px
+    set $resize exec ~/.config/sway/scripts/resize
+    bindsym $left $resize shrink width 32px
+    bindsym $right $resize grow width 32px
+    bindsym $down $resize shrink height 32px
+    bindsym $up $resize grow height 32px
 
-    bindsym Shift+$down resize shrink width 128px
-    bindsym $alt+Shift+$down resize shrink height 128px
-    bindsym Shift+$up resize grow width 128px
-    bindsym $alt+Shift+$up resize grow height 128px
+    bindsym Shift+$left $resize shrink width 128px
+    bindsym Shift+$right $resize grow width 128px
+    bindsym Shift+$down $resize shrink height 128px
+    bindsym Shift+$up $resize grow height 128px
 }
 
 ### Utilities:

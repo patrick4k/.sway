@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# *** Configuration ***
+
+# Layout: tabbed, splith, splitv
+LAYOUT=tabbed
+
+# Size: percentage of the workspace, or pixels (px instead of ppt).
+WIDTH="80 ppt"
+HEIGHT="75 ppt"
+
+# Keep manual size/position changes after creating the group. If
+# false, every time you add something to this workspace, the geometry
+# is sync with what you've defined here.
+PRESERVE_GEOMETRY=false
+
+# *** Main ***
+
+marks=$(swaymsg -r -t get_marks)
+created=false
+
+if jq -e 'index("_scratch_workspace") != null' <<< "$marks" >/dev/null; then
+    swaymsg 'fullscreen disable, floating disable, mark --add _scratch_incoming'
+    swaymsg '[con_mark="^_scratch_workspace$"] move scratchpad'
+    swaymsg '[con_mark="^_scratch_workspace$"] scratchpad show'
+    swaymsg '[con_mark="^_scratch_incoming$"] move container to mark _scratch_workspace'
+    swaymsg '[con_mark="^_scratch_incoming$"] unmark _scratch_incoming'
+else
+    swaymsg "fullscreen disable; floating enable; split h; layout $LAYOUT; focus parent; mark --add _scratch_workspace"
+    created=true
+fi
+
+if [[ "$created" == true || "$PRESERVE_GEOMETRY" == false ]]; then
+    swaymsg "[con_mark=\"^_scratch_workspace$\"] resize set width $WIDTH height $HEIGHT, move position center"
+fi
+
+swaymsg '[con_mark="^_scratch_workspace$"] move scratchpad'
