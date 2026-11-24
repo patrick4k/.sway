@@ -1,15 +1,13 @@
 ### Variables
-#
-# Logo key. Use Mod1 for Alt.
 set $mod Mod4
 set $alt Mod1
-
-# Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
 set $right l
 set $term ghostty
+set $lock_timeout 5400 # 1.5hr
+set $screen_off_timeout 5400 # 1.5hr
 
 exec_always pkill kanshi; exec kanshi
 
@@ -28,8 +26,8 @@ exec sh -c 'for p in /usr/lib/polkit-kde-authentication-agent-1 /usr/lib/x86_64-
 exec wl-paste --type text --watch cliphist store
 exec wl-paste --type image --watch cliphist store
 exec swayidle -w \
-    timeout 300 'swaylock -f -C ~/.config/sway/swaylock/config' \
-    timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+    timeout $lock_timeout 'swaylock -f -C ~/.config/sway/swaylock/config' \
+    timeout $screen_off_timeout 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
     before-sleep 'swaylock -f -C ~/.config/sway/swaylock/config'
 
 ### Input configuration
@@ -57,7 +55,7 @@ seat seat0 hide_cursor when-typing enabled
     # Launcher & menus:
     set $launcher fuzzel --config ~/.config/sway/fuzzel/fuzzel.ini || pkill fuzzel
     bindsym $mod+X exec $launcher
-    bindsym $mod+Shift+s exec ~/.config/sway/scripts/menu-settings
+    bindsym $mod+c exec ~/.config/sway/scripts/menu-settings
     bindsym $mod+v exec ~/.config/sway/scripts/menu-clipboard
     bindsym $mod+Shift+p exec ~/.config/sway/scripts/menu-power
 
@@ -265,10 +263,13 @@ mode "super" {
 
     # Special keys to take screenshots (saved to ~/Pictures/Screenshots and copied to clipboard)
     bindsym Print exec ~/.config/sway/scripts/screenshot region
+    bindsym $mod+Shift+s exec ~/.config/sway/scripts/screenshot region
     bindsym Shift+Print exec ~/.config/sway/scripts/screenshot screen
 
 ### Status Bar:
-exec_always pkill waybar; exec ~/.config/sway/scripts/bar
+exec_always exec ~/.config/sway/scripts/bar
 
+# Set current workspace to 1.1
+exec_always $ws-cycle $ws11
 
 include /etc/sway/config.d/*

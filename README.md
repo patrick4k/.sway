@@ -46,8 +46,8 @@ sudo systemctl enable --now NetworkManager bluetooth power-profiles-daemon
 
 ## Keybindings (Desktop)
 
-- `$mod+X` — App launcher (`fuzzel`)
-- `$mod+Shift+s` — Settings hub (Wi-Fi, Bluetooth, Audio, Power Profile, Clipboard, Screenshot, Power)
-- `$mod+c` — Clipboard history (`cliphist` + `fuzzel`)
+- `$mod+x` — App launcher 
+- `$mod+c` — Configuration hub (Wi-Fi, Bluetooth, Audio, Power Profile, Clipboard, Screenshot, Power)
+- `$mod+v` — Clipboard history 
 - `$mod+Shift+p` — Power / Session menu (Lock, Suspend, Power Profile, Logout, Reboot, Shutdown)
-- `Print` / `Shift+Print` — Region / Full-screen screenshot (saved to `~/Pictures/Screenshots/` & copied to clipboard)
+- `$mod+Shift+s` | `Print` / `Shift+Print` — Region / Full-screen screenshot 

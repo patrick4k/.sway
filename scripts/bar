@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+pkill -x waybar
 exec waybar \
     -c "${XDG_CONFIG_HOME:-$HOME/.config}/sway/waybar/config.jsonc" \
     -s "${XDG_CONFIG_HOME:-$HOME/.config}/sway/waybar/style.css" \
