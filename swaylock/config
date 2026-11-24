@@ -1,0 +1,26 @@
+# Swaylock config (launched with: swaylock -C ~/.config/sway/swaylock/config)
+color=222222
+font=JetBrainsMono
+indicator-radius=90
+indicator-thickness=8
+
+inside-color=222222cc
+inside-clear-color=285577cc
+inside-ver-color=285577cc
+inside-wrong-color=900000cc
+
+ring-color=4c7899
+ring-clear-color=5c9ccf
+ring-ver-color=5c9ccf
+ring-wrong-color=cc3333
+
+key-hl-color=8fc7f0
+bs-hl-color=cc3333
+
+line-color=00000000
+separator-color=00000000
+
+text-color=ffffff
+text-clear-color=ffffff
+text-ver-color=ffffff
+text-wrong-color=ffffff

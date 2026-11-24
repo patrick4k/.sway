@@ -19,7 +19,18 @@ set $switch_mode_super client.focused #6a3d9a #4b2a6e #ffffff #a77bd6 #6a3d9a, m
 
 # special cases
 for_window [class="Godot"] floating enable
+for_window [app_id="org.pulseaudio.pavucontrol|pavucontrol|nm-connection-editor"] floating enable
 exec dbus-update-activation-environment --systemd DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+
+### Desktop environment services
+exec_always pkill mako; exec mako -c ~/.config/sway/mako/config
+exec sh -c 'for p in /usr/lib/polkit-kde-authentication-agent-1 /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1; do [ -x "$p" ] && exec "$p"; done'
+exec wl-paste --type text --watch cliphist store
+exec wl-paste --type image --watch cliphist store
+exec swayidle -w \
+    timeout 300 'swaylock -f -C ~/.config/sway/swaylock/config' \
+    timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+    before-sleep 'swaylock -f -C ~/.config/sway/swaylock/config'
 
 ### Input configuration
 input type:touchpad {
@@ -32,6 +43,8 @@ input type:touchpad {
 }
 
 mouse_warping container
+seat seat0 hide_cursor 3000
+seat seat0 hide_cursor when-typing enabled
 
 ### Key bindings
     # Start a terminal
@@ -41,9 +54,12 @@ mouse_warping container
     # Kill focused window
     bindsym $mod+q kill
 
-    # Launcher:
-    set $launcher fuzzel || pkill fuzzel
+    # Launcher & menus:
+    set $launcher fuzzel --config ~/.config/sway/fuzzel/fuzzel.ini || pkill fuzzel
     bindsym $mod+X exec $launcher
+    bindsym $mod+Shift+s exec ~/.config/sway/scripts/menu-settings
+    bindsym $mod+v exec ~/.config/sway/scripts/menu-clipboard
+    bindsym $mod+Shift+p exec ~/.config/sway/scripts/menu-power
 
     # Drag floating windows by holding down $mod and left mouse button.
     floating_modifier $mod normal
@@ -150,8 +166,7 @@ mouse_warping container
     # You can "split" the current object of your focus with
     # $mod+b or $mod+v, for horizontal and vertical splits
     # respectively.
-    bindsym $mod+b splith
-    bindsym $mod+v splitv
+    bindsym $mod+b splitt
 
     # Switch the current container between different layout styles
     bindsym $mod+s layout stacking
@@ -231,11 +246,11 @@ mode "super" {
 }
 
 ### Utilities:
-    # Special keys to adjust volume via PulseAudio
-    bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
-    bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
-    bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
-    bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+    # Special keys to adjust volume via WirePlumber (capped at 100%)
+    bindsym --locked XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+    bindsym --locked XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+    bindsym --locked XF86AudioRaiseVolume exec wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+
+    bindsym --locked XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
 
     # Special keys to control media via playerctl
     bindsym --locked XF86AudioPlay exec playerctl play-pause
@@ -248,23 +263,12 @@ mode "super" {
     bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
-    # Special key to take a screenshot with grim
-    bindsym Print exec grim
+    # Special keys to take screenshots (saved to ~/Pictures/Screenshots and copied to clipboard)
+    bindsym Print exec ~/.config/sway/scripts/screenshot region
+    bindsym Shift+Print exec ~/.config/sway/scripts/screenshot screen
 
 ### Status Bar:
-# Read `man 5 sway-bar` for more information about this section.
-bar {
-    position top
-    status_command while date +'%d.%m.%y %H:%M:%S'; do sleep 1; done
-    font JetBrainsMono 11
-    colors {
-        statusline #ffffff
-        background #ffffff10
-        inactive_workspace #32323200 #32323200 #5c5c5c
-    }
-    workspace_min_width 64
-    strip_workspace_numbers yes
-}
+exec_always pkill waybar; exec ~/.config/sway/scripts/bar
 
 
 include /etc/sway/config.d/*

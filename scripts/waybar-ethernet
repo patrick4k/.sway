@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Find all connected ethernet devices via NetworkManager
+connected=$(nmcli -t -f DEVICE,TYPE,STATE,CONNECTION device 2>/dev/null \
+    | awk -F: '$2 == "ethernet" && $3 == "connected" {print $1 "\t" $4}')
+
+if [[ -z "$connected" ]]; then
+    jq -nc '{text: "", tooltip: "Ethernet disconnected", class: "disconnected"}'
+    exit 0
+fi
+
+addrs_json=$(ip -j -4 addr show)
+routes_json=$(ip -j -4 route show default)
+
+labels=()
+tooltips=()
+
+while IFS=$'\t' read -r dev conn; do
+    [[ -z "$dev" ]] && continue
+    ip_cidr=$(jq -r --arg d "$dev" '.[] | select(.ifname == $d) | .addr_info[0] | "\(.local)/\(.prefixlen)" // empty' <<< "$addrs_json" 2>/dev/null || true)
+    ip_only="${ip_cidr%%/*}"
+    gw=$(jq -r --arg d "$dev" 'first(.[] | select(.dev == $d) | .gateway) // "none"' <<< "$routes_json" 2>/dev/null || echo "none")
+
+    if [[ -n "$ip_only" ]]; then
+        labels+=("  $ip_only")
+        tooltips+=("${conn} (${dev})\nIP: ${ip_cidr}\nGW: ${gw}")
+    else
+        labels+=("  $dev (no IP)")
+        tooltips+=("${conn} (${dev})\nNo IPv4 address")
+    fi
+done <<< "$connected"
+
+text=$(IFS='  '; echo "${labels[*]}")
+tooltip=$(printf "%b\n\n" "${tooltips[@]}" | sed '$d')
+
+jq -nc --arg text "$text" --arg tooltip "$tooltip" \
+    '{text: $text, tooltip: $tooltip, class: "connected"}'

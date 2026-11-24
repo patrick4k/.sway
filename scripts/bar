@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+exec waybar \
+    -c "${XDG_CONFIG_HOME:-$HOME/.config}/sway/waybar/config.jsonc" \
+    -s "${XDG_CONFIG_HOME:-$HOME/.config}/sway/waybar/style.css" \
+    "$@"

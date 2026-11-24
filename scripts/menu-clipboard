@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pkill -x fuzzel && exit 0
+
+FUZZEL_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/sway/fuzzel/fuzzel.ini"
+
+entries=$(cliphist list 2>/dev/null || true)
+if [[ -z "$entries" ]]; then
+    notify-send -a "Clipboard" "Clipboard history is empty"
+    exit 0
+fi
+
+choice=$(printf "Clear clipboard history\n%s\n" "$entries" \
+    | fuzzel --config="$FUZZEL_CFG" --dmenu --prompt="Clipboard > " --width=65 || true)
+[[ -z "$choice" ]] && exit 0
+
+if [[ "$choice" == "Clear clipboard history" ]]; then
+    cliphist wipe
+    notify-send -a "Clipboard" "Clipboard history cleared"
+else
+    printf "%s\n" "$choice" | cliphist decode | wl-copy
+fi

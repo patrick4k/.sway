@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pkill -x fuzzel && exit 0
+
+FUZZEL_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/sway/fuzzel/fuzzel.ini"
+fuzzel_menu() {
+    fuzzel --config="$FUZZEL_CFG" --dmenu "$@"
+}
+
+notify() {
+    notify-send -a "Bluetooth" "$@"
+}
+
+powered=$(bluetoothctl show | awk '/Powered:/ {print $2; exit}')
+
+if [[ "$powered" == "yes" ]]; then
+    toggle_label="Disable Bluetooth"
+    connected=$(bluetoothctl devices Connected 2>/dev/null || true)
+    paired=$(bluetoothctl devices Paired 2>/dev/null || true)
+    devices=""
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        mac=$(awk '{print $2}' <<< "$line")
+        name=$(cut -d' ' -f3- <<< "$line")
+        if grep -Fq "$mac" <<< "$connected"; then
+            tag="* [connected]"
+        elif grep -Fq "$mac" <<< "$paired"; then
+            tag="  [paired]   "
+        else
+            tag="  [new]      "
+        fi
+        devices+="${tag} ${name} (${mac})"$'\n'
+    done < <(bluetoothctl devices)
+else
+    toggle_label="Enable Bluetooth"
+    devices=""
+fi
+
+entries=$(printf "%s\nScan for devices (5s)\n%s" "$toggle_label" "$devices" | sed '/^$/d')
+choice=$(printf "%s\n" "$entries" | fuzzel_menu --prompt="Bluetooth > " --width=55 || true)
+[[ -z "$choice" ]] && exit 0
+
+case "$choice" in
+    "Enable Bluetooth")
+        bluetoothctl power on >/dev/null && notify "Bluetooth enabled"
+        ;;
+    "Disable Bluetooth")
+        bluetoothctl power off >/dev/null && notify "Bluetooth disabled"
+        ;;
+    "Scan for devices (5s)")
+        notify "Scanning for Bluetooth devices (5s)..."
+        bluetoothctl --timeout 5 scan on >/dev/null 2>&1 || true
+        exec "$0"
+        ;;
+    *)
+        mac=$(sed -nE 's/.*\(([0-9A-Fa-f:]{17})\)$/\1/p' <<< "$choice")
+        name=$(sed -E 's/^(\*| ) \[[a-z]+\] +//; s/ \([0-9A-Fa-f:]{17}\)$//' <<< "$choice")
+        [[ -z "$mac" ]] && exit 0
+
+        if grep -q "\[connected\]" <<< "$choice"; then
+            if bluetoothctl disconnect "$mac" >/dev/null 2>&1; then
+                notify "Disconnected from $name"
+            else
+                notify -u critical "Failed to disconnect from $name"
+            fi
+        elif grep -q "\[paired\]" <<< "$choice"; then
+            notify "Connecting to $name..."
+            if bluetoothctl connect "$mac" >/dev/null 2>&1; then
+                notify "Connected to $name"
+            else
+                notify -u critical "Failed to connect to $name"
+            fi
+        else
+            notify "Pairing and connecting to $name..."
+            bluetoothctl pair "$mac" >/dev/null 2>&1 || true
+            bluetoothctl trust "$mac" >/dev/null 2>&1 || true
+            if bluetoothctl connect "$mac" >/dev/null 2>&1; then
+                notify "Connected to $name"
+            else
+                notify -u critical "Failed to pair/connect to $name"
+            fi
+        fi
+        ;;
+esac

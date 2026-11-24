@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pkill -x fuzzel && exit 0
+
+SWAY_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sway"
+FUZZEL_CFG="$SWAY_DIR/fuzzel/fuzzel.ini"
+SWAYLOCK_CFG="$SWAY_DIR/swaylock/config"
+
+fuzzel_menu() {
+    fuzzel --config="$FUZZEL_CFG" --dmenu "$@"
+}
+
+select_power_profile() {
+    local current choice
+    current=$(powerprofilesctl get 2>/dev/null || echo "balanced")
+    choice=$(printf "performance\nbalanced\npower-saver\n" \
+        | sed "s/^${current}$/* ${current}/" \
+        | fuzzel_menu --prompt="Power Profile > " --width=30 || true)
+    [[ -z "$choice" ]] && exit 0
+    choice="${choice#\* }"
+    powerprofilesctl set "$choice"
+    notify-send -a "Power" "Power profile: $choice"
+}
+
+if [[ "${1:-}" == "profile" ]]; then
+    select_power_profile
+    exit 0
+fi
+
+current_profile=$(powerprofilesctl get 2>/dev/null || echo "unknown")
+
+choice=$(printf "Lock\nSuspend\nPower Profile (%s)\nLogout\nReboot\nShutdown\n" "$current_profile" \
+    | fuzzel_menu --prompt="Power > " --width=32 || true)
+[[ -z "$choice" ]] && exit 0
+
+case "$choice" in
+    Lock)
+        exec swaylock -C "$SWAYLOCK_CFG"
+        ;;
+    Suspend)
+        swaylock -C "$SWAYLOCK_CFG" -f
+        exec systemctl suspend
+        ;;
+    "Power Profile"*)
+        select_power_profile
+        ;;
+    Logout)
+        exec swaymsg exit
+        ;;
+    Reboot)
+        exec systemctl reboot
+        ;;
+    Shutdown)
+        exec systemctl poweroff
+        ;;
+esac

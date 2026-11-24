@@ -1,0 +1,112 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 28,
+    "spacing": 4,
+
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "pulseaudio",
+        "custom/ethernet",
+        "network#wifi",
+        "bluetooth",
+        "power-profiles-daemon",
+        "battery",
+        "tray"
+    ],
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": false,
+        "format": "{name}"
+    },
+
+    "sway/mode": {
+        "format": "{}",
+        "tooltip": false
+    },
+
+    "clock": {
+        "interval": 1,
+        "format": "{:%d.%m.%y %H:%M:%S}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "on-click": "~/.config/sway/scripts/menu-power"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "🔇 muted",
+        "format-icons": {
+            "headphone": "🎧",
+            "default": ["🔈", "🔉", "🔊"]
+        },
+        "scroll-step": 5,
+        "on-click": "~/.config/sway/scripts/menu-audio",
+        "on-click-right": "pavucontrol",
+        "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+    },
+
+    "custom/ethernet": {
+        "exec": "~/.config/sway/scripts/waybar-ethernet",
+        "return-type": "json",
+        "interval": 5,
+        "on-click": "nm-connection-editor"
+    },
+
+    "network#wifi": {
+        "interface": "wl*",
+        "interval": 5,
+        "format-wifi": "  {essid} ({signalStrength}%)",
+        "format-disconnected": "  off",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}\nGW: {gwaddr}\nFreq: {frequency} GHz\n↑ {bandwidthUpBytes}  ↓ {bandwidthDownBytes}",
+        "tooltip-format-disconnected": "Wi-Fi disconnected",
+        "on-click": "~/.config/sway/scripts/menu-wifi",
+        "on-click-right": "nm-connection-editor"
+    },
+
+    "bluetooth": {
+        "format": " {status}",
+        "format-connected": " {device_alias}",
+        "format-connected-battery": " {device_alias} ({device_battery_percentage}%)",
+        "format-off": " off",
+        "tooltip-format": "{controller_alias}\n{num_connections} connected",
+        "tooltip-format-connected": "{controller_alias}\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias} ({device_address})",
+        "on-click": "~/.config/sway/scripts/menu-bluetooth"
+    },
+
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+        "tooltip": true,
+        "format-icons": {
+            "default": "",
+            "performance": "",
+            "balanced": "",
+            "power-saver": ""
+        },
+        "on-click": "~/.config/sway/scripts/menu-power profile"
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    }
+}

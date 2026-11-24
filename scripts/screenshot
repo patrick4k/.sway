@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FUZZEL_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/sway/fuzzel/fuzzel.ini"
+OUT_DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$OUT_DIR"
+FILE="$OUT_DIR/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png"
+
+mode="${1:-region}"
+
+if [[ "$mode" == "menu" ]]; then
+    choice=$(printf "Region (clipboard + save)\nFull screen (clipboard + save)\n" \
+        | fuzzel --config="$FUZZEL_CFG" --dmenu --prompt="Screenshot > " --width=36 || true)
+    case "$choice" in
+        Region*) mode="region" ;;
+        Full*)   mode="screen" ;;
+        *)       exit 0 ;;
+    esac
+fi
+
+case "$mode" in
+    region)
+        geom=$(slurp) || exit 0
+        grim -g "$geom" - | tee "$FILE" | wl-copy
+        ;;
+    screen)
+        grim - | tee "$FILE" | wl-copy
+        ;;
+    *)
+        echo "Usage: $0 [region|screen|menu]" >&2
+        exit 1
+        ;;
+esac
+
+notify-send -a "Screenshot" "Saved & copied to clipboard" "$FILE"

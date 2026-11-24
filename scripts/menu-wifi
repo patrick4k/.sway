@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pkill -x fuzzel && exit 0
+
+FUZZEL_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/sway/fuzzel/fuzzel.ini"
+fuzzel_menu() {
+    fuzzel --config="$FUZZEL_CFG" --dmenu "$@"
+}
+
+notify() {
+    notify-send -a "Wi-Fi" "$@"
+}
+
+wifi_state=$(nmcli -t -f WIFI general)
+
+if [[ "$wifi_state" == "enabled" ]]; then
+    toggle_label="Disable Wi-Fi"
+    # Format: IN-USE:SIGNAL:SECURITY:SSID (--rescan no avoids a 3-5s blocking scan)
+    raw_list=$(nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list --rescan no 2>/dev/null || true)
+    networks=$(awk -F: '
+        $4 != "" {
+            inuse = ($1 == "*") ? "* " : "  "
+            sig = sprintf("%3s%%", $2)
+            sec = ($3 != "" && $3 != "--") ? "[lock]" : "[open]"
+            if (!seen[$4]++) {
+                printf "%s%s %s %s\n", inuse, sig, sec, $4
+            }
+        }
+    ' <<< "$raw_list")
+else
+    toggle_label="Enable Wi-Fi"
+    networks=""
+fi
+
+entries=$(printf "%s\nRescan networks\nOpen Network Editor\n%s" "$toggle_label" "$networks" | sed '/^$/d')
+choice=$(printf "%s\n" "$entries" | fuzzel_menu --prompt="Wi-Fi > " --width=55 || true)
+[[ -z "$choice" ]] && exit 0
+
+case "$choice" in
+    "Enable Wi-Fi")
+        nmcli radio wifi on && notify "Wi-Fi enabled"
+        ;;
+    "Disable Wi-Fi")
+        nmcli radio wifi off && notify "Wi-Fi disabled"
+        ;;
+    "Rescan networks")
+        notify "Scanning for Wi-Fi networks..."
+        nmcli device wifi rescan 2>/dev/null || true
+        sleep 1
+        exec "$0"
+        ;;
+    "Open Network Editor")
+        exec nm-connection-editor
+        ;;
+    *)
+        # Strip leading "* " or "  ", signal, and [lock]/[open]
+        sec=$(awk '{print $2}' <<< "${choice#??}")
+        ssid=$(sed -E 's/^(\*| ) [ 0-9]{3}% \[(lock|open)\] //' <<< "$choice")
+        [[ -z "$ssid" ]] && exit 0
+
+        if nmcli -t -f NAME connection show | grep -Fxq "$ssid"; then
+            if nmcli connection up "$ssid" >/dev/null 2>&1; then
+                notify "Connected to $ssid"
+            else
+                notify -u critical "Failed to connect to $ssid"
+            fi
+        else
+            if [[ "$sec" == "[lock]" ]]; then
+                password=$(fuzzel_menu --password --lines=0 --prompt="Password ($ssid) > " || true)
+                [[ -z "$password" ]] && exit 0
+                if nmcli device wifi connect "$ssid" password "$password" >/dev/null 2>&1; then
+                    notify "Connected to $ssid"
+                else
+                    notify -u critical "Failed to connect to $ssid"
+                fi
+            else
+                if nmcli device wifi connect "$ssid" >/dev/null 2>&1; then
+                    notify "Connected to $ssid"
+                else
+                    notify -u critical "Failed to connect to $ssid"
+                fi
+            fi
+        fi
+        ;;
+esac

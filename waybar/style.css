@@ -1,0 +1,92 @@
+* {
+    font-family: "JetBrains Mono", "JetBrainsMono", "FontAwesome", "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 5 Free", "Font Awesome 5 Brands", monospace;
+    font-size: 11px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: rgba(34, 34, 34, 0.92);
+    color: #ffffff;
+    border-bottom: 1px solid #323232;
+}
+
+#workspaces button {
+    padding: 0 12px;
+    min-width: 48px;
+    background-color: transparent;
+    color: #888888;
+    border-bottom: 2px solid transparent;
+}
+
+#workspaces button:hover {
+    background-color: rgba(76, 120, 153, 0.25);
+    color: #ffffff;
+}
+
+#workspaces button.focused {
+    background-color: #285577;
+    color: #ffffff;
+    border-bottom: 2px solid #4c7899;
+}
+
+#workspaces button.urgent {
+    background-color: #900000;
+    color: #ffffff;
+}
+
+#mode {
+    padding: 0 10px;
+    margin-left: 6px;
+    background-color: #4b2a6e;
+    color: #ffffff;
+    border: 1px solid #a77bd6;
+    font-weight: bold;
+}
+
+#clock,
+#pulseaudio,
+#custom-ethernet,
+#network,
+#bluetooth,
+#power-profiles-daemon,
+#battery,
+#tray {
+    padding: 0 10px;
+    color: #ffffff;
+}
+
+#pulseaudio:hover,
+#custom-ethernet:hover,
+#network:hover,
+#bluetooth:hover,
+#power-profiles-daemon:hover,
+#clock:hover {
+    background-color: rgba(76, 120, 153, 0.3);
+}
+
+#pulseaudio.muted,
+#network.disconnected,
+#bluetooth.off {
+    color: #888888;
+}
+
+#battery.warning {
+    color: #f0c674;
+}
+
+#battery.critical {
+    background-color: #900000;
+    color: #ffffff;
+}
+
+tooltip {
+    background-color: #222222;
+    border: 2px solid #4c7899;
+    border-radius: 0;
+}
+
+tooltip label {
+    color: #ffffff;
+}

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pkill -x fuzzel && exit 0
+
+FUZZEL_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/sway/fuzzel/fuzzel.ini"
+fuzzel_menu() {
+    fuzzel --config="$FUZZEL_CFG" --dmenu "$@"
+}
+
+notify() {
+    notify-send -a "Audio" "$@"
+}
+
+default_sink=$(pactl get-default-sink)
+default_source=$(pactl get-default-source)
+
+sinks=$(pactl -f json list sinks | jq -r --arg def "$default_sink" '
+    .[] | (if .name == $def then "* " else "  " end) + "[Out] " + .description + "\t" + "sink:" + .name
+')
+
+sources=$(pactl -f json list sources | jq -r --arg def "$default_source" '
+    .[] | select(.monitor_source == null and (.name | endswith(".monitor") | not))
+    | (if .name == $def then "* " else "  " end) + "[In]  " + .description + "\t" + "source:" + .name
+')
+
+menu_items=$(cat <<EOF
+Toggle Output Mute	action:mute-sink
+Toggle Mic Mute	action:mute-source
+Open Volume Mixer (pavucontrol)	action:pavucontrol
+$sinks
+$sources
+EOF
+)
+
+# Show only the display column (before the tab), then match back to the target
+display=$(awk -F'\t' 'NF {print $1}' <<< "$menu_items")
+choice=$(printf "%s\n" "$display" | fuzzel_menu --prompt="Audio > " --width=60 || true)
+[[ -z "$choice" ]] && exit 0
+
+target=$(awk -F'\t' -v c="$choice" '$1 == c {print $2; exit}' <<< "$menu_items")
+[[ -z "$target" ]] && exit 0
+
+case "$target" in
+    action:mute-sink)
+        pactl set-sink-mute @DEFAULT_SINK@ toggle
+        ;;
+    action:mute-source)
+        pactl set-source-mute @DEFAULT_SOURCE@ toggle
+        ;;
+    action:pavucontrol)
+        exec pavucontrol
+        ;;
+    sink:*)
+        sink_name="${target#sink:}"
+        pactl set-default-sink "$sink_name"
+        notify "Output switched" "${choice#*[Out] }"
+        ;;
+    source:*)
+        source_name="${target#source:}"
+        pactl set-default-source "$source_name"
+        notify "Input switched" "${choice#*[In]  }"
+        ;;
+esac

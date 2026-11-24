@@ -1,0 +1,26 @@
+# Mako notification daemon config (launched with: mako -c ~/.config/sway/mako/config)
+font=JetBrainsMono 10
+background-color=#222222f2
+text-color=#ffffffff
+border-color=#4c7899ff
+progress-color=over #285577ff
+
+width=340
+height=120
+margin=12
+padding=10
+border-size=2
+border-radius=0
+default-timeout=5000
+ignore-timeout=0
+max-visible=5
+sort=-time
+anchor=top-right
+
+[urgency=low]
+border-color=#555555ff
+default-timeout=3000
+
+[urgency=high]
+border-color=#cc3333ff
+default-timeout=0
