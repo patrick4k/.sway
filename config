@@ -269,7 +269,7 @@ mode "super" {
 ### Status Bar:
 exec_always exec ~/.config/sway/scripts/bar
 
-# Set current workspace to 1.1
-exec_always $ws-cycle $ws11
+# Post Load Setup
+exec $ws-cycle $ws11
 
 include /etc/sway/config.d/*
